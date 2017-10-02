@@ -10,8 +10,11 @@ Try `example/app.js` with
 npm install
 npm start
 
-open localhost:8080/user1
-open localhost:8080/user2
+curl --data '' http://localhost:8080/bundle/user1
+curl --data '' http://localhost:8080/bundle/user2
+
+curl --data '' http://localhost:8080/reload/user1
+curl --data '' http://localhost:8080/reload/user2
 ```
 
 ## Usage
@@ -35,15 +38,15 @@ app.listen(8080);
 
 ## Server API
 
-Start building `username`'s webpack bundle. If it's already building, this will wait to respond until building is complete.
+Start building `username`'s webpack bundle and wait until it completes. If it's already building, this will wait to respond until building is complete.
 
 ```
-GET /:username
+POST /bundle/:username
 ```
 
 
 Reload `username`'s webpack config.
 
 ```
-POST :username
+POST /reload/:username
 ```

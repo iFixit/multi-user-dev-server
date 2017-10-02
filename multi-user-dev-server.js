@@ -6,11 +6,11 @@ const Express = require("express");
  * This creates a simple web service that runs `webpack --watch` for multiple
  * users/configs. It can be controlled by a simple web API.
  *
- * Build a user's bundle, or wait until it is done bundling
- *   GET /:username
+ * Build a user's bundle and wait until it is done bundling
+ *   POST /bundle/:username
  *
  * Reload a user's webpack config
- *   POST /:username
+ *   POST /reload/:username
  *
  * @param optionsFromUsername A function that takes a username and returns a
  *                            options for multi-user-dev-server. See sample in
@@ -117,7 +117,7 @@ function createDevServer(optionsFromUsername) {
   /**
    * This endpoint reloads the webpack configuration for `username`.
    */
-  app.post('/:username', reloadConfig(true), (req, res, next) => {
+  app.post('/reload/:username', reloadConfig(true), (req, res, next) => {
     res.status(201);
     res.send('devServer reloaded\n');
   });
@@ -125,7 +125,7 @@ function createDevServer(optionsFromUsername) {
   /**
    * This endpoint responds when username's bundle has finished being bundled.
    */
-  app.get('/:username', reloadConfig(false), (req, res, next) => {
+  app.post('/bundle/:username', reloadConfig(false), (req, res, next) => {
     const options = optionsFromUsername(req.username);
     const bundleDone = compilers[req.username].whenDone();
 
