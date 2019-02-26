@@ -16,13 +16,16 @@ const CompilerCollection = require("./compiler-collection.js");
  * @param optionsFromUsername A function that takes a username and returns a
  *                            options for multi-user-dev-server. See sample in
  *                            example/app.js.
+ * @param expireUnusedAfterSeconds Number of seconds after which webpack
+ *                            watchers that are unused will be closed /
+ *                            released. 0 or null == no expiration.
  * @return Express App
  */
-function createDevServer(optionsFromUsername) {
+function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
   const app = Express();
 
   // Map of username -> { compiler, watching, whenDone }
-  const compilers = CompilerCollection();
+  const compilers = CompilerCollection(expireUnusedAfterSeconds);
 
   /**
    * Given a username of a user on the dev machine, this returns an object with:
