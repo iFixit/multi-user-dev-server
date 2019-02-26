@@ -1,4 +1,4 @@
-modules.exports = () => {
+module.exports = () => {
   const compilers = new Map();
 
   return {
