@@ -96,7 +96,7 @@ function createDevServer(optionsFromUsername) {
           }
         }
 
-        compilers[req.username] = getUserCompiler(req.username, forceReload);
+        compilers[req.username] = getUserCompiler(req.username);
         next();
       } catch (e) {
         compilers[req.username] = null;
