@@ -1,6 +1,7 @@
 const fs = require("fs");
 const webpack = require("webpack");
 const Express = require("express");
+const CompilerCollection = require("./compiler-collection.js");
 
 /**
  * This creates a simple web service that runs `webpack --watch` for multiple
@@ -21,7 +22,7 @@ function createDevServer(optionsFromUsername) {
   const app = Express();
 
   // Map of username -> { compiler, watching, whenDone }
-  const compilers = {};
+  const compilers = CompilerCollection();
 
   /**
    * Given a username of a user on the dev machine, this returns an object with:
@@ -83,7 +84,8 @@ function createDevServer(optionsFromUsername) {
   const reloadConfig = forceReload => {
     return (req, res, next) => {
       try {
-        if (compilers[req.username]) {
+        const compiler = compilers.get(req.username);
+        if (compiler) {
           // This user's config has already been loaded.
           if (!forceReload) {
             // If we're not forcing a reload, continue.
@@ -91,15 +93,15 @@ function createDevServer(optionsFromUsername) {
           } else {
             // If we are forcing a reload, cancel the filesystem watching from
             // the old compiler.
-            compilers[req.username].watching.close(() =>
+            compiler.watching.close(() =>
               console.log(`${req.username}'s config reloaded`));
           }
         }
 
-        compilers[req.username] = getUserCompiler(req.username);
+        compilers.set(req.username, getUserCompiler(req.username));
         next();
       } catch (e) {
-        compilers[req.username] = null;
+        compilers.remove(req.username);
         res.status(500);
         res.send('Reload failed: ' + e.message);
       }
@@ -127,7 +129,7 @@ function createDevServer(optionsFromUsername) {
    */
   app.post('/bundle/:username', reloadConfig(false), (req, res, next) => {
     const options = optionsFromUsername(req.username);
-    const bundleDone = compilers[req.username].whenDone();
+    const bundleDone = compilers.get(req.username).whenDone();
 
     // After 20 seconds, respond with a 500 and tell the user to wait longer.
     // That way, they know why it's taking so long.
