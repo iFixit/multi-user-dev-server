@@ -1,5 +1,5 @@
 const fs = require("fs");
-const webpack = require("webpack");
+const WebpackWatcher = require("./webpack-watcher.js");
 const Express = require("express");
 const CompilerCollection = require("./compiler-collection.js");
 
@@ -49,7 +49,7 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     // started.
     delete require.cache[require.resolve(options.configPath)];
     const getWebpackConfig = require(options.configPath);
-    const compiler = webpack(getWebpackConfig(options.webpackEnv || {}));
+    const compiler = WebpackWatcher(getWebpackConfig(options.webpackEnv || {}));
 
     // `whenDone` will add pending promises to this list, which will be resolved
     // when the `watching` handler gets called.
