@@ -24,18 +24,17 @@ const CompilerCollection = require("./compiler-collection.js");
 function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
   const app = Express();
 
-  // Map of username -> { compiler, watching, whenDone }
+  // Map of username -> { compiler, watching }
   const compilers = CompilerCollection(expireUnusedAfterSeconds);
 
   /**
    * Given a username of a user on the dev machine, this returns an object with:
    *   compiler: a webpack compiler instance
    *   watching: a watching instance from calling compiler.watch()
-   *   whenDone: returns a promise that resolves when the user's bundle is done
    *
    * @param string username A username, will be used in optionsFromUsername()
    *
-   * @return { compiler, watching, whenDone }
+   * @return { compiler, watching }
    */
   const getUserCompiler = username => {
     if (!/^[\w\-_]+$/.test(username)) {
@@ -43,37 +42,20 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     }
 
     const options = optionsFromUsername(username);
+    options.username = username;
 
     // Hack: Make sure that node loads the most up-to-date version of the
     // user's webpack config, since it may have changed since this server
     // started.
-    delete require.cache[require.resolve(options.configPath)];
-    const getWebpackConfig = require(options.configPath);
-    const compiler = WebpackWatcher(getWebpackConfig(options.webpackEnv || {}));
-
-    // `whenDone` will add pending promises to this list, which will be resolved
-    // when the `watching` handler gets called.
-    let promises = [];
+    const compiler = WebpackWatcher(options);
 
     const watching = compiler.watch({}, (err, stats) => {
-      // resolve and clear all the promises added by `whenDone`.
-      promises.forEach(({ resolve, reject }) => err ? reject(err) : resolve());
-      promises = [];
-
       // logging
       const endDateString = new Date(stats.endTime * 1000).toISOString();
       console.log(`${username} bundled at ${endDateString}`);
     });
 
-    const whenDone = () => new Promise((resolve, reject) => {
-      if (!watching.running) {
-        resolve();
-      } else {
-        promises.push({ resolve, reject });
-      }
-    });
-
-    return { compiler, watching, whenDone };
+    return { compiler, watching };
   }
 
   /**
@@ -132,7 +114,7 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
    */
   app.post('/bundle/:username', reloadConfig(false), (req, res, next) => {
     const options = optionsFromUsername(req.username);
-    const bundleDone = compilers.get(req.username).whenDone();
+    const bundleDone = compilers.get(req.username).watching.whenDone();
 
     // After 20 seconds, respond with a 500 and tell the user to wait longer.
     // That way, they know why it's taking so long.
