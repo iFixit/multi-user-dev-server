@@ -31,27 +31,25 @@ module.exports = (options) => {
       watchers.clear();
    }
 
-   function whenDone() {
-      return new Promise((resolve, reject) => {
-         watchers.add({resolve, reject});
-         child.send({event: 'isRunning'})
-      });
-   }
-
-   const watcher = {
+   const watchController = {
       close: () => {
          console.log("Killing " + options.username);
          child.kill();
          notifyWatchers()
       },
-      whenDone
+      whenDone: () => {
+         new Promise((resolve, reject) => {
+            watchers.add({resolve, reject});
+            child.send({event: 'isRunning'})
+         })
+      }
    }
 
    return {
       watch: (watchOptions, callback) => {
          child.send({event: 'watch', options, watchOptions});
          onBundled = callback;
-         return watcher;
+         return watchController;
       },
    }
 }
