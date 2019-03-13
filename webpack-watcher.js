@@ -5,7 +5,7 @@ module.exports = (options) => {
    const child = childProcess.fork(__dirname + '/webpack-compiler.js')
 
    let onBundled = () => {}
-   let watchers = [];
+   const watchers = new Set();
 
    child.on('message', (message) => {
       switch (message && message.event) {
@@ -28,12 +28,12 @@ module.exports = (options) => {
          console.log("notifying " + watchers.length + " watchers that bundling " + options.username + success);
       }
       watchers.forEach(({resolve, reject}) => err ? reject(err) : resolve());
-      watchers = [];
+      watchers.clear();
    }
 
    function whenDone() {
       return new Promise((resolve, reject) => {
-         watchers.push({resolve, reject});
+         watchers.add({resolve, reject});
          child.send({event: 'isRunning'})
       });
    }
