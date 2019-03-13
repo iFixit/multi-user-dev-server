@@ -4,14 +4,14 @@ module.exports = (options) => {
    console.log("Forking " + options.username);
    const child = childProcess.fork(__dirname + '/webpack-compiler.js')
 
-   let bundledCallback = () => {}
+   let onBundled = () => {}
    let watchers = [];
 
    child.on('message', (message) => {
       switch (message && message.event) {
          // {err, stats}
          case 'built':
-            bundledCallback(message.err, message.stats);
+            onBundled(message.err, message.stats);
             notifyWatchers(message.err);
             break;
 
@@ -50,7 +50,7 @@ module.exports = (options) => {
    return {
       watch: (watchOptions, callback) => {
          child.send({event: 'watch', options, watchOptions});
-         bundledCallback = callback;
+         onBundled = callback;
          return watcher;
       },
    }
