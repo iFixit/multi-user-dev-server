@@ -35,7 +35,7 @@ module.exports = (options) => {
       close: () => {
          console.log("Killing " + options.username);
          child.kill();
-         notifyWatchers()
+         notifyWatchers("Webpack killed before building completed")
       },
       whenDone: () => {
          new Promise((resolve, reject) => {
