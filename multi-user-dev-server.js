@@ -42,6 +42,9 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     }
 
     const options = optionsFromUsername(username);
+    // Record the username in the options so the watcher can log relevant
+    // messages. The function here is provided by the runner of the app
+    // so we can't depend on them doing this.
     options.username = username;
 
     const compiler = WebpackWatcher(options);
