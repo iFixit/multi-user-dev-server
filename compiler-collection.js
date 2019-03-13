@@ -9,7 +9,7 @@ module.exports = (expireAfterSeconds) => {
   function removeExpiredCompilers() {
     compilers.forEach((compiler, username) => {
       if (isExpired(compiler)) {
-        console.log(`${username}: bundle was unused for ${expireAfterSeconds} seoncds, expiring.`);
+        console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
         interface.remove(username);
       }
     })
