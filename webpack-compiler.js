@@ -17,7 +17,7 @@ process.on('message', (message) => {
       case 'isRunning':
          // If we're not running (building), let them know we're done;
          // otherwise, they'll find out via the 'built' event.
-         if (!watcher.running) {
+         if (watcher && !watcher.running) {
             process.send({event: 'notRunning'});
          }
       break;
