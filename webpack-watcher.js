@@ -1,8 +1,7 @@
 const childProcess = require('child_process');
-const webpack = require("webpack");
 
 module.exports = (options) => {
-   console.log("Forking " + username);
+   console.log("Forking " + options.username);
    const child = childProcess.fork(__dirname + '/webpack-compiler.js')
 
    let bundledCallback = () => {}
@@ -41,7 +40,7 @@ module.exports = (options) => {
 
    const watcher = {
       close: () => {
-         console.log("Killing " + username);
+         console.log("Killing " + options.username);
          child.kill();
          notifyWatchers()
       },
