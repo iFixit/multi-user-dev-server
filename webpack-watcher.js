@@ -37,12 +37,11 @@ module.exports = (options) => {
          child.kill();
          notifyWatchers("Webpack killed before building completed")
       },
-      whenDone: () => {
-         new Promise((resolve, reject) => {
-            watchers.add({resolve, reject});
-            child.send({event: 'isRunning'})
-         })
-      }
+      whenDone: () => new Promise((resolve, reject) => {
+         watchers.add({resolve, reject});
+         child.send({event: 'isRunning'})
+         console.log("asking isRunning");
+      })
    }
 
    return {
