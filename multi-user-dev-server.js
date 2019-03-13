@@ -44,9 +44,6 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     const options = optionsFromUsername(username);
     options.username = username;
 
-    // Hack: Make sure that node loads the most up-to-date version of the
-    // user's webpack config, since it may have changed since this server
-    // started.
     const compiler = WebpackWatcher(options);
 
     const watching = compiler.watch({}, (err, stats) => {
