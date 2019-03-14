@@ -3,7 +3,7 @@ module.exports = (expireAfterSeconds) => {
   const compilers = new Map();
 
   if (expireAfterSeconds) {
-    // Check for expired things often enough to exipre things within
+    // Check for expired things often enough to expire things within
     // 20% of their true expiration time.
     setInterval(removeExpiredCompilers, expireAfterSeconds / 5);
   }
