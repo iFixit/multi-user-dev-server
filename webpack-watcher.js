@@ -25,7 +25,6 @@ module.exports = (options) => {
    function notifyWatchers(err) {
       if (watchers.length) {
          const success = err ? " has failed" : " has succeeded";
-         console.log("notifying " + watchers.length + " watchers that bundling " + options.username + success);
       }
       watchers.forEach(({resolve, reject}) => err ? reject(err) : resolve());
       watchers.clear();
@@ -40,7 +39,6 @@ module.exports = (options) => {
       whenDone: () => new Promise((resolve, reject) => {
          watchers.add({resolve, reject});
          child.send({event: 'isRunning'})
-         console.log("asking isRunning");
       })
    }
 
