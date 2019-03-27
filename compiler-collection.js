@@ -8,8 +8,10 @@ module.exports = (expireAfterSeconds) => {
        return;
     }
     clearTimeout(compiler.expiredTimeout);
-    compiler.expiredTimeout = setTimeout(() => collection.remove(username), expireMs);
-    console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
+    compiler.expiredTimeout = setTimeout(() => {
+       collection.remove(username)
+       console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
+    }, expireMs);
   }
 
   const collection = {
