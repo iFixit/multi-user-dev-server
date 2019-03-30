@@ -31,7 +31,7 @@ const app = multiUserDevServer(username => {
     // What to respond with for `GET /:username` (optional)
     successResponse: `Bundle completed in ${__dirname}/${username}`,
   };
-});
+}, 3600 /* seconds after which unaccessed webpack instances will be stopped */);
 
 app.listen(8080);
 ```
