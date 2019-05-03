@@ -116,9 +116,9 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     const options = optionsFromUsername(req.username);
     const bundleDone = compilers.get(req.username).watching.whenDone();
 
-    // After 20 seconds, respond with a 500 and tell the user to wait longer.
+    // After 60 seconds, respond with a 500 and tell the user to wait longer.
     // That way, they know why it's taking so long.
-    const timeoutDone = timeoutPromise(20000).then(() =>
+    const timeoutDone = timeoutPromise(60000).then(() =>
       Promise.reject("Bundle still building, try refreshing"));
 
     Promise.race([
