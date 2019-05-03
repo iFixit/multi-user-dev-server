@@ -128,7 +128,7 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
       res.status(200);
       res.send(options.successResponse || 'bundle built');
     }, err => {
-      res.status(500);
+      res.status(504);
       res.send(err);
     });
   });
