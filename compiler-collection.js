@@ -1,17 +1,24 @@
 module.exports = (expireAfterSeconds) => {
   const expireMs = expireAfterSeconds * 1000;
   const compilers = new Map();
+  const expirationTimers = new Map();
 
   function resetExpireTimeout(username) {
-    const compiler = compilers.get(username)
-    if (!compiler || !expireMs) {
+    clearExpirationTimer(username);
+    if (!expireMs) {
        return;
     }
-    clearTimeout(compiler.expiredTimeout);
-    compiler.expiredTimeout = setTimeout(() => {
-       collection.remove(username)
-       console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
-    }, expireMs);
+    expirationTimers.set(username, setTimeout(() => {
+      collection.remove(username)
+      console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
+    }, expireMs));
+  }
+
+  function clearExpirationTimer(username) {
+    const timer = expirationTimers.get(username);
+    if (timer) {
+      clearTimeout(timer);
+    }
   }
 
   const collection = {
@@ -24,6 +31,7 @@ module.exports = (expireAfterSeconds) => {
       resetExpireTimeout(username)
     },
     remove: (username) => {
+      clearExpirationTimer(username);
       const compiler = compilers.get(username);
       if (!compiler) return;
       compiler.watching.close();
