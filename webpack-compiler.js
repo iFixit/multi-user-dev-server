@@ -3,6 +3,7 @@
 const webpack = require("webpack");
 
 var watcher = null;
+let errFromPreviousBuild = null;
 
 process.on('message', (message) => {
    switch (message && message.event) {
@@ -18,7 +19,7 @@ process.on('message', (message) => {
          // If we're not running (building), let them know we're done;
          // otherwise, they'll find out via the 'built' event.
          if (watcher && !watcher.running) {
-            process.send({event: 'notRunning'});
+            process.send({event: 'notRunning', err: errFromPreviousBuild});
          }
       break;
    }
@@ -30,5 +31,6 @@ function getWebpack(options, watchOptions) {
    return webpack(config).watch(watchOptions, (err, stats) => {
       // let the parent know we built our bundle
       process.send({event: 'built', err, stats: {endTime: stats && stats.endTime}});
+      errFromPreviousBuild = err;
    });
 }
