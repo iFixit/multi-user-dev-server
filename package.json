@@ -1,6 +1,6 @@
 {
   "name": "multi-user-dev-server",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "main": "multi-user-dev-server.js",
   "description": "Create a webpack dev server that supports multiple users (or configs) on one port.",
   "license": "MIT",
