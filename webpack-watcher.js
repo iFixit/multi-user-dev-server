@@ -17,7 +17,7 @@ module.exports = (options) => {
 
          // If we're not running (building), then there's nothing to wait on.
          case 'notRunning':
-            notifyWatchers();
+            notifyWatchers(message.err);
             break;
       }
    });
