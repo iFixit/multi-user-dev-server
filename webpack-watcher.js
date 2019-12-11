@@ -2,7 +2,7 @@ const childProcess = require('child_process');
 
 module.exports = (options) => {
    console.log("Forking " + options.username);
-   const child = childProcess.fork(__dirname + '/webpack-compiler.js')
+   const child = forkCompiler();
 
    let onBundled = () => {}
    const watchers = new Set();
@@ -40,6 +40,10 @@ module.exports = (options) => {
          watchers.add({resolve, reject});
          child.send({event: 'isRunning'})
       })
+   }
+
+   function forkCompiler() {
+      return childProcess.fork(__dirname + '/webpack-compiler.js');
    }
 
    return {
