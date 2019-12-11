@@ -39,14 +39,19 @@ module.exports = (options) => {
       },
       whenDone: () => new Promise((resolve, reject) => {
          watchers.add({resolve, reject});
-         child.send({event: 'isRunning'})
+         if (child.connected) {
+            child.send({event: 'isRunning'})
+         } else {
+            notifyWatchers("Webpack child process crashed, check the log");
+         }
       })
    }
 
    function forkCompiler() {
       const forkOptions = getForkOptions();
       const child = childProcess.fork(__dirname + '/webpack-compiler.js', forkOptions)
-      logOutput(child)
+      logOutput(child);
+      listenForExit(child);
       return child;
    }
 
@@ -65,6 +70,13 @@ module.exports = (options) => {
       options.log = fs.createWriteStream(options.logPath, {flags: "a"});
       child.stdout.pipe(options.log);
       child.stderr.pipe(options.log);
+   }
+
+   function listenForExit(child) {
+      child.on('exit', function(code) {
+         console.log("Process for " + options.username + " stopped with exit code: " + code);
+         notifyWatchers("Webpack child process crashed, check the log");
+      });
    }
 
    return {
