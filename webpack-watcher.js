@@ -1,4 +1,5 @@
 const childProcess = require('child_process');
+const fs = require('fs');
 
 module.exports = (options) => {
    console.log("Forking " + options.username);
@@ -43,7 +44,27 @@ module.exports = (options) => {
    }
 
    function forkCompiler() {
-      return childProcess.fork(__dirname + '/webpack-compiler.js');
+      const forkOptions = getForkOptions();
+      const child = childProcess.fork(__dirname + '/webpack-compiler.js', forkOptions)
+      logOutput(child)
+      return child;
+   }
+
+   function getForkOptions() {
+      const output = options.logPath ? 'pipe' : 'inherit';
+      return {
+         stdio: ['inherit', output, output, 'ipc']
+      };
+   }
+
+   function logOutput(child) {
+      if (!options.logPath) {
+         return;
+      }
+
+      options.log = fs.createWriteStream(options.logPath, {flags: "a"});
+      child.stdout.pipe(options.log);
+      child.stderr.pipe(options.log);
    }
 
    return {
