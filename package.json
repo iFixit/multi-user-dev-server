@@ -14,5 +14,10 @@
   },
   "scripts": {
     "start": "node example/app.js"
-  }
+  },
+  "files": [
+     "LICENSE",
+     "README*",
+     "*.js"
+  ]
 }
