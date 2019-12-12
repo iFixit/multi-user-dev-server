@@ -24,6 +24,11 @@ module.exports = (options) => {
    });
 
    function notifyWatchers(err) {
+      if ((typeof err) == 'string') {
+         const log = options.logPath ? ": " + options.logPath : "";
+         err = err + ". Check the log" + log;
+      }
+
       if (watchers.length) {
          const success = err ? " has failed" : " has succeeded";
       }
@@ -42,7 +47,7 @@ module.exports = (options) => {
          if (child.connected) {
             child.send({event: 'isRunning'})
          } else {
-            notifyWatchers("Webpack child process crashed, check the log");
+            notifyWatchers("Webpack child process crashed");
          }
       })
    }
@@ -75,7 +80,7 @@ module.exports = (options) => {
    function listenForExit(child) {
       child.on('exit', function(code) {
          console.log("Process for " + options.username + " stopped with exit code: " + code);
-         notifyWatchers("Webpack child process crashed, check the log");
+         notifyWatchers("Webpack child process crashed");
       });
    }
 
