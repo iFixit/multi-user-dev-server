@@ -29,8 +29,24 @@ function getWebpack(options, watchOptions) {
    const getWebpackConfig = require(options.configPath);
    const config = getWebpackConfig(options.webpackEnv || {});
    return webpack(config).watch(watchOptions, (err, stats) => {
+      const endTime = stats && stats.endTime;
       // let the parent know we built our bundle
-      process.send({event: 'built', err, stats: {endTime: stats && stats.endTime}});
+      if (err) {
+         console.error("build failed at: " + timestamp(endTime));
+         console.error(err);
+      } else if (stats && stats.compilation && stats.compilation.errors.length) {
+         err = "Build failed";
+         console.error("build failed at: " + timestamp(endTime));
+         console.error(stats.compilation.errors);
+      } else {
+         console.log("build succeeded at: " + timestamp(endTime));
+      }
+
+      process.send({event: 'built', err, stats: {endTime: endTime}});
       errFromPreviousBuild = err;
    });
+}
+
+function timestamp(timestampMs){
+   return (new Date(timestampMs)).toLocaleString();
 }

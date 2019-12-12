@@ -1,8 +1,9 @@
 const childProcess = require('child_process');
+const fs = require('fs');
 
 module.exports = (options) => {
    console.log("Forking " + options.username);
-   const child = childProcess.fork(__dirname + '/webpack-compiler.js')
+   const child = forkCompiler();
 
    let onBundled = () => {}
    const watchers = new Set();
@@ -23,6 +24,11 @@ module.exports = (options) => {
    });
 
    function notifyWatchers(err) {
+      if ((typeof err) == 'string') {
+         const log = options.logPath ? ": " + options.logPath : "";
+         err = err + ". Check the log" + log;
+      }
+
       if (watchers.length) {
          const success = err ? " has failed" : " has succeeded";
       }
@@ -38,8 +44,44 @@ module.exports = (options) => {
       },
       whenDone: () => new Promise((resolve, reject) => {
          watchers.add({resolve, reject});
-         child.send({event: 'isRunning'})
+         if (child.connected) {
+            child.send({event: 'isRunning'})
+         } else {
+            notifyWatchers("Webpack child process crashed");
+         }
       })
+   }
+
+   function forkCompiler() {
+      const forkOptions = getForkOptions();
+      const child = childProcess.fork(__dirname + '/webpack-compiler.js', forkOptions)
+      logOutput(child);
+      listenForExit(child);
+      return child;
+   }
+
+   function getForkOptions() {
+      const output = options.logPath ? 'pipe' : 'inherit';
+      return {
+         stdio: ['inherit', output, output, 'ipc']
+      };
+   }
+
+   function logOutput(child) {
+      if (!options.logPath) {
+         return;
+      }
+
+      options.log = fs.createWriteStream(options.logPath, {flags: "a"});
+      child.stdout.pipe(options.log);
+      child.stderr.pipe(options.log);
+   }
+
+   function listenForExit(child) {
+      child.on('exit', function(code) {
+         console.log("Process for " + options.username + " stopped with exit code: " + code);
+         notifyWatchers("Webpack child process crashed");
+      });
    }
 
    return {
