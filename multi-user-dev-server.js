@@ -128,8 +128,14 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
       res.status(200);
       res.send(options.successResponse || 'bundle built');
     }, err => {
+      const errorInfo = {
+         stack: err && err.stack,
+         details: err && err.details,
+         err: err,
+         errAsString: String(err),
+      }
       res.status(504);
-      res.send(JSON.stringify(err));
+      res.send(JSON.stringify(errorInfo));
     });
   });
 
