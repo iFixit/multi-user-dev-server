@@ -26,6 +26,9 @@ process.on('message', (message) => {
 });
 
 function getWebpack(options, watchOptions) {
+   if (options.username) {
+      process.title = "webpack-watcher for " + options.username;
+   }
    const getWebpackConfig = require(options.configPath);
    const config = getWebpackConfig(options.webpackEnv || {});
    return webpack(config).watch(watchOptions, (err, stats) => {
