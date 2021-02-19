@@ -3,7 +3,8 @@ const fs = require('fs');
 
 module.exports = (options) => {
    console.log("Forking " + options.username);
-   const child = forkCompiler();
+   const uid = Number(childProcess.execSync(`id -u ${options.username}`, { encoding: 'utf-8' }));
+   const child = forkCompiler(uid);
 
    let onBundled = () => {}
    const watchers = new Set();
@@ -52,18 +53,19 @@ module.exports = (options) => {
       })
    }
 
-   function forkCompiler() {
-      const forkOptions = getForkOptions();
+   function forkCompiler(uid) {
+      const forkOptions = getForkOptions(uid);
       const child = childProcess.fork(__dirname + '/webpack-compiler.js', forkOptions)
       logOutput(child);
       listenForExit(child);
       return child;
    }
 
-   function getForkOptions() {
+   function getForkOptions(uid) {
       const output = options.logPath ? 'pipe' : 'inherit';
       return {
-         stdio: ['inherit', output, output, 'ipc']
+         stdio: ['inherit', output, output, 'ipc'],
+         uid,
       };
    }
 
