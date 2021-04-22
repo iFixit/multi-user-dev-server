@@ -2,6 +2,8 @@
 // messages with the parent process.
 const webpack = require("webpack");
 
+process.umask(0o002);
+
 var watcher = null;
 let errFromPreviousBuild = null;
 
