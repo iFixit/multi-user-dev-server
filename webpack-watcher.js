@@ -3,8 +3,8 @@ const fs = require('fs');
 
 module.exports = (options) => {
    console.log("Forking " + options.username);
-   const uid = Number(childProcess.execSync(`id -u ${options.username}`, { encoding: 'utf-8' }));
-   const gid = Number(childProcess.execSync(`id -g ${options.username}`, { encoding: 'utf-8' }));
+   const uid = Number(childProcess.execSync(`id -u apache`, { encoding: 'utf-8' }));
+   const gid = Number(childProcess.execSync(`id -g ifixit`, { encoding: 'utf-8' }));
    const child = forkCompiler(uid, gid);
 
    let onBundled = () => {}
