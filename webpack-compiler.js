@@ -1,6 +1,5 @@
 // This module is run via childProcess.fork() and communicates via IPC
 // messages with the parent process.
-const webpack = require("webpack");
 
 process.umask(0o002);
 
@@ -28,6 +27,8 @@ process.on('message', (message) => {
 });
 
 function getWebpack(options, watchOptions) {
+   const webpack = require(options.webpackModulePath || 'webpack');
+
    if (options.username) {
       process.title = "webpack-watcher for " + options.username;
    }
