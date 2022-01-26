@@ -1,4 +1,6 @@
-module.exports = (expireAfterSeconds) => {
+const TimerCollection = require('./timer-collection');
+
+module.exports = (expireUnusedAfterSeconds) => {
   const expireUnused = new TimerCollection(
     expireAfterSeconds * 1000,
     (username) => {
@@ -28,22 +30,4 @@ module.exports = (expireAfterSeconds) => {
   }
 
   return collection;
-}
-
-function TimerCollection(expireMs, onExpire) {
-  const expirationTimers = new Map();
-  this.reset = function resetTimer(username) {
-    clearTimer(username);
-    if (!expireMs) {
-       return;
-    }
-    expirationTimers.set(username, setTimeout(() => onExpire(username)));
-  }
-
-  this.clear = function clearTimer(username) {
-    const timer = expirationTimers.get(username);
-    if (timer) {
-      clearTimeout(timer);
-    }
-  }
 }
