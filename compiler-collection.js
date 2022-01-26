@@ -8,6 +8,13 @@ module.exports = (expireUnusedAfterSeconds) => {
       console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
     }
   );
+  const expireMaxLifetime = new TimerCollection(
+    maxLifetimeSeconds * 1000,
+    (username) => {
+      const compiler = collection.remove(username);
+      console.log(`${username}: bundle was unused for ${expireAfterSeconds} seconds, expiring.`);
+    }
+  );
 
   const compilers = new Map();
 

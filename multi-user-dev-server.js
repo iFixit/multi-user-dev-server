@@ -2,6 +2,7 @@ const fs = require("fs");
 const WebpackWatcher = require("./webpack-watcher.js");
 const Express = require("express");
 const CompilerCollection = require("./compiler-collection.js");
+const TimerCollection = require('./timer-collection');
 
 /**
  * This creates a simple web service that runs `webpack --watch` for multiple
@@ -19,13 +20,26 @@ const CompilerCollection = require("./compiler-collection.js");
  * @param expireUnusedAfterSeconds Number of seconds after which webpack
  *                            watchers that are unused will be closed /
  *                            released. 0 or null == no expiration.
+ * @param maxLifetimeSeconds Number of seconds after which webpack watchers that
+ *                            will be killed and restarted. To protect against
+ *                            memory leaks in webpack.
  * @return Express App
  */
-function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
+function createDevServer(
+  optionsFromUsername,
+  expireUnusedAfterSeconds,
+  maxLifetimeSeconds) {
   const app = Express();
 
   // Map of username -> { compiler, watching }
   const compilers = CompilerCollection(expireUnusedAfterSeconds);
+
+  const maxLifetimeTimers = new TimerCollection(maxLifetimeSeconds, (username) => {
+    const compiler = compilers.get(username);
+    if (compiler) {
+      startNewCompiler(username);
+    }
+  });
 
   /**
    * Given a username of a user on the dev machine, this returns an object with:
@@ -94,7 +108,9 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     }
 
     compilers.set(username, getUserCompiler(req.username));
-    maxLifetimeTimers.reset(username);
+    if (maxLifetimeSeconds) {
+      maxLifetimeTimers.reset(username);
+    }
   }
 
   const timeoutPromise = timeout =>
