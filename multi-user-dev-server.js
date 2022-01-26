@@ -70,20 +70,11 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
     return (req, res, next) => {
       try {
         const compiler = compilers.get(req.username);
-        if (compiler) {
-          // This user's config has already been loaded.
-          if (!forceReload) {
-            // If we're not forcing a reload, continue.
-            return next();
-          } else {
-            // If we are forcing a reload, cancel the filesystem watching from
-            // the old compiler.
-            compiler.watching.close(() =>
-              console.log(`${req.username}'s config reloaded`));
-          }
+        if (compiler && !forceReload) {
+          // If we're not forcing a reload, continue.
+          return next();
         }
-
-        compilers.set(req.username, getUserCompiler(req.username));
+        startNewCompiler(req.username);
         next();
       } catch (e) {
         compilers.remove(req.username);
@@ -91,6 +82,19 @@ function createDevServer(optionsFromUsername, expireUnusedAfterSeconds) {
         res.send('Reload failed: ' + e.message);
       }
     };
+  }
+
+  const startNewCompiler = function(username) {
+    const compiler = compilers.get(username);
+    if (compiler) {
+      // If a compiler exists, cancel the filesystem watching from
+      // the old compiler.
+      compiler.watching.close(() =>
+        console.log(`${req.username}'s config reloaded`));
+    }
+
+    compilers.set(username, getUserCompiler(req.username));
+    maxLifetimeTimers.reset(username);
   }
 
   const timeoutPromise = timeout =>
